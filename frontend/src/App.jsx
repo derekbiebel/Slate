@@ -9,6 +9,7 @@ import { calculateScore, getLetterValue } from './lib/scoring';
 import { recordGame } from './lib/stats';
 import { fireConfetti } from './lib/confetti';
 import StatsScreen from './components/StatsScreen';
+import HowToPlay from './components/HowToPlay';
 
 // In production, point to the deployed backend. In dev, Vite proxy handles it.
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -53,6 +54,7 @@ export default function App() {
   const [revealWord, setRevealWord] = useState('');
   const [isPractice, setIsPractice] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showHelp, setShowHelp] = useState(() => !localStorage.getItem('slate_seen_help'));
 
   // Drag state
   const [dragging, setDragging] = useState(null); // { trayIndex, letter }
@@ -353,7 +355,12 @@ export default function App() {
         maxHeight: '-webkit-fill-available',
       }}
     >
-      <Header onLogoDown={handleLogoDown} onLogoUp={handleLogoUp} onStatsClick={() => setShowStats(true)} />
+      <Header
+        onLogoDown={handleLogoDown}
+        onLogoUp={handleLogoUp}
+        onStatsClick={() => setShowStats(true)}
+        onHelpClick={() => setShowHelp(true)}
+      />
 
       <div className="flex-1 flex flex-col items-center justify-between w-full px-4 min-h-0">
         {/* Top section: score + board */}
@@ -406,8 +413,9 @@ export default function App() {
         </div>
       </div>
 
-      {/* Stats modal */}
+      {/* Modals */}
       {showStats && <StatsScreen onClose={() => setShowStats(false)} />}
+      {showHelp && <HowToPlay onClose={() => { setShowHelp(false); localStorage.setItem('slate_seen_help', '1'); }} />}
 
       {/* Floating drag ghost */}
       {dragging && hasMoved.current && (

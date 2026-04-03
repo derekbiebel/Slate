@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getLetterValue } from '../lib/scoring';
+import StatsScreen from './StatsScreen';
 
 const MULTIPLIER_COLORS = {
   DL: '#4ade80',
@@ -15,6 +16,7 @@ export default function RevealScreen({ result, word, onPlayAgain }) {
   const [displayScore, setDisplayScore] = useState(0);
   const [visible, setVisible] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
   useEffect(() => {
     requestAnimationFrame(() => setVisible(true));
@@ -277,22 +279,40 @@ export default function RevealScreen({ result, word, onPlayAgain }) {
         {copied ? 'COPIED!' : 'COPY RESULT'}
       </button>
 
-      {/* New game button */}
-      {onPlayAgain && (
+      {/* Action buttons */}
+      <div className="flex gap-3 mt-4 shrink-0">
         <button
-          onClick={onPlayAgain}
-          className="mt-4 px-6 py-3 rounded-lg text-xs font-medium border transition-all duration-200 active:opacity-70 shrink-0"
+          onClick={() => setShowStats(true)}
+          className="px-5 py-3 rounded-lg text-xs font-light border transition-all duration-200 active:opacity-70"
           style={{
-            letterSpacing: '4px',
-            background: '#C9A84C',
-            borderColor: '#C9A84C',
-            color: '#fff',
+            letterSpacing: '3px',
+            background: 'transparent',
+            borderColor: '#D5D0C8',
+            color: 'rgba(0,0,0,0.4)',
             minHeight: 48,
           }}
         >
-          NEW GAME
+          STATS
         </button>
-      )}
+        {onPlayAgain && (
+          <button
+            onClick={onPlayAgain}
+            className="px-5 py-3 rounded-lg text-xs font-medium border transition-all duration-200 active:opacity-70"
+            style={{
+              letterSpacing: '4px',
+              background: '#C9A84C',
+              borderColor: '#C9A84C',
+              color: '#fff',
+              minHeight: 48,
+            }}
+          >
+            NEW GAME
+          </button>
+        )}
+      </div>
+
+      {/* Stats modal */}
+      {showStats && <StatsScreen onClose={() => setShowStats(false)} />}
     </div>
   );
 }
