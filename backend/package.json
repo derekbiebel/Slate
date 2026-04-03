@@ -3,8 +3,12 @@
   "version": "1.0.0",
   "description": "Slate word game backend",
   "main": "src/server.js",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "start": "node src/server.js",
+    "build": "npm rebuild better-sqlite3",
     "dev": "node --watch src/server.js",
     "test": "node src/test.js"
   },
