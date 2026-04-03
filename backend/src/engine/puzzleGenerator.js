@@ -55,16 +55,16 @@ const CONSONANT_POOL = [
 function generatePuzzle(dateString) {
   const rand = seededRandom(dateString);
 
-  // Generate 10 letters: at least 4 vowels
+  // Generate 12 letters: at least 5 vowels
   const letters = [];
 
-  // Pick 4 vowels first
-  for (let i = 0; i < 4; i++) {
+  // Pick 5 vowels first
+  for (let i = 0; i < 5; i++) {
     letters.push(VOWELS[Math.floor(rand() * VOWELS.length)]);
   }
 
-  // Pick 6 consonants from weighted pool
-  for (let i = 0; i < 6; i++) {
+  // Pick 7 consonants from weighted pool
+  for (let i = 0; i < 7; i++) {
     letters.push(CONSONANT_POOL[Math.floor(rand() * CONSONANT_POOL.length)]);
   }
 

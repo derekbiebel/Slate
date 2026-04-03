@@ -6,6 +6,9 @@ import ScoreDisplay from './components/ScoreDisplay';
 import ActionButtons from './components/ActionButtons';
 import RevealScreen from './components/RevealScreen';
 import { calculateScore, getLetterValue } from './lib/scoring';
+import { recordGame } from './lib/stats';
+import { fireConfetti } from './lib/confetti';
+import StatsScreen from './components/StatsScreen';
 
 // In production, point to the deployed backend. In dev, Vite proxy handles it.
 const API_BASE = import.meta.env.VITE_API_URL || '';
@@ -49,6 +52,7 @@ export default function App() {
   const [revealResult, setRevealResult] = useState(null);
   const [revealWord, setRevealWord] = useState('');
   const [isPractice, setIsPractice] = useState(false);
+  const [showStats, setShowStats] = useState(false);
 
   // Drag state
   const [dragging, setDragging] = useState(null); // { trayIndex, letter }
@@ -295,8 +299,17 @@ export default function App() {
           setInvalidSlots([]);
         }, 400);
       } else {
+        // Record stats
+        const stats = recordGame(data.score, data.percentile, word, data.bestWord || '');
+        data.stats = stats;
+
         setRevealResult(data);
         setRevealWord(word);
+
+        // Confetti if player got the best word
+        if (stats.wasPerfect) {
+          setTimeout(() => fireConfetti(), 600);
+        }
       }
     } catch {
       setInvalidMessage('Connection error');
@@ -340,7 +353,7 @@ export default function App() {
         maxHeight: '-webkit-fill-available',
       }}
     >
-      <Header onLogoDown={handleLogoDown} onLogoUp={handleLogoUp} />
+      <Header onLogoDown={handleLogoDown} onLogoUp={handleLogoUp} onStatsClick={() => setShowStats(true)} />
 
       <div className="flex-1 flex flex-col items-center justify-between w-full px-4 min-h-0">
         {/* Top section: score + board */}
@@ -392,6 +405,9 @@ export default function App() {
           />
         </div>
       </div>
+
+      {/* Stats modal */}
+      {showStats && <StatsScreen onClose={() => setShowStats(false)} />}
 
       {/* Floating drag ghost */}
       {dragging && hasMoved.current && (
