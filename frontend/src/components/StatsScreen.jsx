@@ -5,6 +5,9 @@ export default function StatsScreen({ onClose }) {
   const winPct = stats.gamesPlayed > 0
     ? Math.round((stats.wins / stats.gamesPlayed) * 100)
     : 0;
+  const avgPercentile = stats.history.length > 0
+    ? Math.round(stats.history.reduce((sum, g) => sum + g.percentile, 0) / stats.history.length)
+    : 0;
 
   return (
     <div
@@ -25,10 +28,11 @@ export default function StatsScreen({ onClose }) {
         </div>
 
         {/* Main stats grid */}
-        <div className="grid grid-cols-4 gap-2 mb-6">
+        <div className="grid grid-cols-5 gap-2 mb-6">
           {[
             { value: stats.gamesPlayed, label: 'Played' },
             { value: winPct + '%', label: 'Win %' },
+            { value: avgPercentile, label: 'Avg %ile' },
             { value: stats.currentStreak, label: 'Streak' },
             { value: stats.longestStreak, label: 'Best' },
           ].map((stat, i) => (
