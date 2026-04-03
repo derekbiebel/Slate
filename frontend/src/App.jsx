@@ -7,6 +7,9 @@ import ActionButtons from './components/ActionButtons';
 import RevealScreen from './components/RevealScreen';
 import { calculateScore, getLetterValue } from './lib/scoring';
 
+// In production, point to the deployed backend. In dev, Vite proxy handles it.
+const API_BASE = import.meta.env.VITE_API_URL || '';
+
 function getOrCreateUserId() {
   let id = localStorage.getItem('slate_userId');
   if (!id) {
@@ -75,7 +78,7 @@ export default function App() {
 
   const fetchRandomPuzzle = useCallback(async () => {
     try {
-      const r = await fetch('/api/puzzle/random');
+      const r = await fetch(API_BASE + '/api/puzzle/random');
       const data = await r.json();
       setPuzzle(data);
       setIsPractice(true);
@@ -270,7 +273,7 @@ export default function App() {
     }
 
     try {
-      const res = await fetch('/api/score/practice', {
+      const res = await fetch(API_BASE + '/api/score/practice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
