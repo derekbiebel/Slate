@@ -126,8 +126,8 @@ app.post('/api/score/practice', (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Slate backend running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Slate backend running on port ${PORT}`);
 });
 
 module.exports = app;
