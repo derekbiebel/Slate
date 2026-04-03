@@ -8,7 +8,6 @@
   },
   "scripts": {
     "start": "node src/server.js",
-    "build": "npm rebuild better-sqlite3",
     "dev": "node --watch src/server.js",
     "test": "node src/test.js"
   },
