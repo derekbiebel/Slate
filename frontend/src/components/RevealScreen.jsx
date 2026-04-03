@@ -102,7 +102,7 @@ export default function RevealScreen({ result, word, onPlayAgain }) {
         src="/logo.png"
         alt="Slate"
         className="h-8 w-auto mb-6 shrink-0"
-        style={{ mixBlendMode: 'multiply' }}
+        style={{}}
       />
 
       {/* Word */}

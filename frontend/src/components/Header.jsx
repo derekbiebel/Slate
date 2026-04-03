@@ -17,7 +17,7 @@ export default function Header({ onLogoDown, onLogoUp, onStatsClick, onHelpClick
         src="/logo.png"
         alt="Slate"
         className="h-10 w-auto opacity-80"
-        style={{ mixBlendMode: 'multiply' }}
+        style={{}}
         onPointerDown={onLogoDown}
         onPointerUp={onLogoUp}
         onPointerCancel={onLogoUp}

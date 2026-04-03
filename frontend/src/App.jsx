@@ -100,35 +100,6 @@ export default function App() {
   const score = puzzle ? calculateScore(boardSlots, puzzle.board) : 0;
   const filledCount = boardSlots.filter(Boolean).length;
 
-  // Find the consecutive run of filled slots
-  const getWordRange = useCallback((slots) => {
-    let first = -1, last = -1;
-    for (let i = 0; i < 5; i++) {
-      if (slots[i] !== null) {
-        if (first === -1) first = i;
-        last = i;
-      }
-    }
-    return { first, last };
-  }, []);
-
-  // Find the next valid slot to append a letter
-  const getNextAppendSlot = useCallback((slots) => {
-    const { first, last } = getWordRange(slots);
-    if (first === -1) return 0; // board empty, start at 0
-    if (last < 4) return last + 1; // append to right
-    return null; // board full on the right
-  }, [getWordRange]);
-
-  // Check if a slot is a valid drop target (keeps word consecutive)
-  const isValidDropSlot = useCallback((slotIndex, slots) => {
-    if (slots[slotIndex] !== null) return false; // already filled
-    const { first, last } = getWordRange(slots);
-    if (first === -1) return true; // board empty, any slot is fine
-    // Must be immediately before or after the current word
-    return slotIndex === first - 1 || slotIndex === last + 1;
-  }, [getWordRange]);
-
   // Place a letter at a specific slot
   const placeLetterAt = useCallback((trayIndex, slot) => {
     if (!puzzle) return;
@@ -146,33 +117,33 @@ export default function App() {
     setInvalidSlots([]);
   }, [puzzle]);
 
-  // Tap to place — appends to end of word
+  // Tap to place — fills next empty slot from left
   const handleTileTap = useCallback(
     (trayIndex) => {
-      const slot = getNextAppendSlot(boardSlots);
-      if (slot === null) return;
-      placeLetterAt(trayIndex, slot);
+      if (!puzzle) return;
+      const emptySlot = boardSlots.indexOf(null);
+      if (emptySlot === -1) return;
+      placeLetterAt(trayIndex, emptySlot);
     },
-    [boardSlots, getNextAppendSlot, placeLetterAt],
+    [puzzle, boardSlots, placeLetterAt],
   );
 
-  // Tap a board slot to remove — removes from that slot to the end of word
+  // Tap a board slot to remove just that letter
   const handleSlotTap = useCallback((slotIndex) => {
     if (boardSlots[slotIndex] === null) return;
-    const { last } = getWordRange(boardSlots);
     setBoardSlots((prev) => {
       const next = [...prev];
-      for (let i = slotIndex; i <= last; i++) next[i] = null;
+      next[slotIndex] = null;
       return next;
     });
     setSlotSources((prev) => {
       const next = [...prev];
-      for (let i = slotIndex; i <= last; i++) next[i] = null;
+      next[slotIndex] = null;
       return next;
     });
     setInvalidMessage('');
     setInvalidSlots([]);
-  }, [boardSlots, getWordRange]);
+  }, [boardSlots]);
 
   const handleClear = useCallback(() => {
     setBoardSlots([null, null, null, null, null]);
@@ -229,8 +200,7 @@ export default function App() {
 
       setDragPos({ x: clientX, y: clientY });
       const slot = findSlotAtPosition(clientX, clientY);
-      // Only highlight if it's a valid consecutive drop
-      setHoverSlot(slot !== null && isValidDropSlot(slot, boardSlots) ? slot : null);
+      setHoverSlot(slot !== null && boardSlots[slot] === null ? slot : null);
     };
 
     const handleEnd = (e) => {
@@ -241,9 +211,9 @@ export default function App() {
         // Didn't drag — treat as tap (appends to end)
         handleTileTap(dragging.trayIndex);
       } else {
-        // Dropped — check which slot, must be valid consecutive position
+        // Dropped — place on any empty slot
         const slot = findSlotAtPosition(clientX, clientY);
-        if (slot !== null && isValidDropSlot(slot, boardSlots)) {
+        if (slot !== null && boardSlots[slot] === null) {
           placeLetterAt(dragging.trayIndex, slot);
         }
       }
@@ -263,7 +233,7 @@ export default function App() {
       window.removeEventListener('pointerup', handleEnd);
       window.removeEventListener('pointercancel', handleEnd);
     };
-  }, [dragging, boardSlots, findSlotAtPosition, handleTileTap, isValidDropSlot, placeLetterAt]);
+  }, [dragging, boardSlots, findSlotAtPosition, handleTileTap, placeLetterAt]);
 
   // ---- SUBMIT ----
   const handleSubmit = useCallback(async () => {
@@ -276,6 +246,18 @@ export default function App() {
     const placement = [];
     for (let i = 0; i < 5; i++) {
       if (boardSlots[i]) placement.push(i);
+    }
+
+    // Check for gaps
+    for (let i = 1; i < placement.length; i++) {
+      if (placement[i] !== placement[i - 1] + 1) {
+        setInvalidMessage('NO GAPS — LETTERS MUST BE CONSECUTIVE');
+        setInvalidSlots(placement);
+        setShaking(true);
+        setTimeout(() => { setShaking(false); setInvalidSlots([]); }, 400);
+        setSubmitting(false);
+        return;
+      }
     }
 
     try {
@@ -390,7 +372,7 @@ export default function App() {
               className="text-[10px] font-light mt-2 text-center text-black/15"
               style={{ letterSpacing: '2px' }}
             >
-              DRAG TILES TO THE BOARD
+              DRAG OR TAP TILES TO THE BOARD
             </div>
           )}
         </div>
